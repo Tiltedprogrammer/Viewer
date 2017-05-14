@@ -13,8 +13,8 @@ interface ModelInterface: Observable,Read {
     var countColorsInTable : Int
     var colorTable: ByteArray?
     var pixelArray: ByteArray?
-    var CirUsed: Int
-    fun setImg(headerInfo: ByteArray, Stream: DataInputStream)
+    var ClrUsed: Int
+    fun setImg(data: ByteArray)
     override fun notifyObservers() {
         for (ob in observers) {
             ob.update(this)

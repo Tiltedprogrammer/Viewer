@@ -7,34 +7,48 @@ import java.io.IOException
  */
 class BMPController(override var view: ViewInterface, override var model: ModelInterface = BMP24Model()):ControllerInterface{
     override fun setData(path: String) {
-        var streamIn: FileInputStream
+        var streamIn : FileInputStream
         try {
             streamIn = FileInputStream(path)
-        } catch(e: IOException) {
-            println("File not found")
+        }
+        catch (e : IOException) {
+            println("file not found")
             return
         }
-        var DataInput = DataInputStream(streamIn)
-        if (readint16(DataInput) == 0x4D42) {
-            skip(DataInput, 8)
-            var bfOffBits = readint32(DataInput)
-            var bitCount = readint32(DataInput)
-            var headerInfo = ByteArray(bitCount - 4)
-            //println("width" + getValue(headerInfo,0,4))
-            //println("height" + getValue(headerInfo,4,4))
-            readFully(DataInput, headerInfo)
-            if (getValue(headerInfo, 10, 2) == 24) {
 
-                model = BMP24Model()
+        var data : ByteArray = ByteArray(streamIn.available())
+        streamIn.read(data)
 
-            } else if (getValue(headerInfo, 10, 2) == 8)
-                model = BMP8Model()
-            model.registerObserver(view)
-            model.setImg(headerInfo, DataInput)
+        var file_extension = String(data.copyOfRange(0,2))
 
-
-        } else {
+        if (file_extension != "BM" ){
+            println("File extension is incorrect")
             return
         }
+        when(getValue(data,0x0E,4)){
+            12 ->{
+                if (data[0x0A].toInt() == 24) {
+                    model = BMP24Model()
+
+                } else if (data[0x0A].toInt() == 8)
+                    model = BMP8Model()
+
+            }
+            else -> {
+                if (data[0x1C].toInt() == 24) {
+                    model = BMP24Model()
+
+                } else if (data[0x1C].toInt() == 8)
+                    model = BMP8Model()
+
+            }
+
+
+        }
+        model.registerObserver(view)
+        model.setImg(data)
+
+
     }
+
 }

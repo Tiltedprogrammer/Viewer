@@ -12,29 +12,48 @@ class BMP8Model: ModelInterface {
     override var countColorsInTable: Int = 0
     override var pixelArray: ByteArray? = null
     override var colorTable: ByteArray? = null
-    override var CirUsed: Int = 0
-    //override var image: BufferedImage? = null
-    var pixel: Int = 0
+    override var ClrUsed: Int = 0
     override var observers: ArrayList<Observer> = ArrayList()
-    override fun setImg(headerInfo: ByteArray, Stream: DataInputStream) {
-        size = getValue(headerInfo,16,4)
-        width = getValue(headerInfo,0,4)
-        height = getValue(headerInfo,4,4)
+    override fun setImg(data: ByteArray) {
+        val headerInfo = getData(data)
+        size = getValue(data,0x02,4)
+        width = headerInfo.get("biWidth")!!
+        height = headerInfo.get("biHeight")!!
         var WidthWithPad: Int = when ((width) % 4) {
             1 ->  + 3
             2 ->  + 2
             3 ->  + 1
             else -> 0
         }
-        CirUsed = getValue(headerInfo,28,4)
-        var CirImportant = getValue(headerInfo,32,4)
-        var tmpColorTable = ByteArray(256*4)
-        readFully(Stream,tmpColorTable)
-        colorTable = tmpColorTable
-        var realsize =(((width+WidthWithPad)* height))
-        pixelArray = ByteArray(realsize)
-        readFully(Stream,pixelArray!!)
+        pixelStartIndex = getValue(data, 0x0A,4)
+        colorTable = data.copyOfRange((headerInfo.get("headerSize")!! + 14),pixelStartIndex-1)
+        pixelArray = data.copyOfRange(pixelStartIndex, size)
         notifyObservers()
 
+    }
+    fun getData(data: ByteArray): HashMap<String, Int>{
+        var headerInfo = HashMap<String,Int>()
+        val version = getValue(data,0x0E,2)
+        when(version){
+            12 -> {
+
+            }
+            40 -> {
+                headerInfo.put("headerSize",version)
+                headerInfo.put("biWidth", getValue(data,0x12,4))
+                headerInfo.put("biHeight", getValue(data, 0x16, 4))
+                headerInfo.put("biCompression", getValue(data,0x1E,4))
+                headerInfo.put("biSize", getValue(data,0x22,4))
+
+            }
+            108 -> {
+
+            }
+            124 ->{
+
+            }
+
+        }
+        return headerInfo
     }
 }
