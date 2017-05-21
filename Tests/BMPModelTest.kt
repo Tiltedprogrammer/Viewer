@@ -7,6 +7,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.Arrays.copyOf
+import java.util.Arrays.parallelSetAll
 
 /**
  * Created by Holden Caulfield on 12.05.2017.
@@ -38,7 +39,7 @@ class BMPModelTest {
 
     @Test
     fun bmp8Correctness() {
-        val name = "bogts_8bit.bmp"
+        val name = "2.bmp"
         val file = File(name)
         val actualImage = read(file)
         val model = BMP8Model()
@@ -50,40 +51,69 @@ class BMPModelTest {
             3 -> 1
             else -> 0
         }
-        for (i in model.height - 1 downTo 0) {
-            for (j in 0..model.width - 1) {
+        if(model.height > 0) {
+            for (i in model.height - 1 downTo 0) {
+                for (j in 0..model.width - 1) {
 
-                var col = model.pixelArray!![(model.height - 1 - i) * (model.width + WidthWithPad) + j].toInt()
+                    var col = model.pixelArray!![(model.height - 1 - i) * (model.width + WidthWithPad) + j].toInt()
 
-                if (col < 0) {
-                    col += 256
-                }
-                col *= 4
-                var blue = model.colorTable!![col++].toInt()
-                if (blue < 0)
-                    blue += 256
+                    if (col < 0) {
+                        col += 256
+                    }
+                    col *= 4
+                    var blue = model.colorTable!![col++].toInt()
+                    if (blue < 0)
+                        blue += 256
 
-                var green = model.colorTable!![col++].toInt()
-                if (green < 0)
-                    green += 256
+                    var green = model.colorTable!![col++].toInt()
+                    if (green < 0)
+                        green += 256
 
-                var red = model.colorTable!![col++].toInt()
-                if (red < 0)
-                    red += 256
-                if (Color(actualImage.getRGB(j, i)) != Color(red, green, blue)) {
-                    assertEquals(1, 2)
+                    var red = model.colorTable!![col++].toInt()
+                    if (red < 0)
+                        red += 256
+                    if (Color(actualImage.getRGB(j, i)) != Color(red, green, blue)) {
+                        assertEquals(1, 2)
+                    }
+
                 }
 
             }
+        }
+        else{
+            for (i in  0 downTo Math.abs(model.height) - 1) {
+                for (j in 0..model.width - 1) {
 
+                    var col = model.pixelArray!![(i) * (model.width + WidthWithPad) + j].toInt()
+
+                    if (col < 0) {
+                        col += 256
+                    }
+                    col *= 4
+                    var blue = model.colorTable!![col++].toInt()
+                    if (blue < 0)
+                        blue += 256
+
+                    var green = model.colorTable!![col++].toInt()
+                    if (green < 0)
+                        green += 256
+
+                    var red = model.colorTable!![col++].toInt()
+                    if (red < 0)
+                        red += 256
+                    if (Color(actualImage.getRGB(j, i)) != Color(red, green, blue)) {
+                        assertEquals(1, 2)
+                    }
+
+                }
+
+            }
         }
     }
     @Test
     fun bmp24Correctness() {
         val names = ArrayList<String>()
-        names.add("beaut_24bit.bmp")
-        names.add("lena_black.bmp")
-        names.add("lena.bmp")
+        names.add("1.bmp")
         for (filename in names) {
             val file = File(filename)
             val actualImage = read(file)
@@ -96,15 +126,28 @@ class BMPModelTest {
                 3 -> +1
                 else -> 0
             }
-            for (i in model.height - 1 downTo 0) {
-                for (j in 0..model.width - 1) {
-                    rgb = getValue(model.pixelArray, (model.height - 1 - i) * (model.width * 3 + WidthWithPad) + 3 * j, 3)
-                    if (Color(actualImage.getRGB(j, i)) != Color(rgb)) {
-                        assertEquals(1, 2)
+            if (model.height > 0) {
+                for (i in model.height - 1 downTo 0) {
+                    for (j in 0..model.width - 1) {
+                        rgb = getValue(model.pixelArray, (model.height - 1 - i) * (model.width * 3 + WidthWithPad) + 3 * j, 3)
+                        if (Color(actualImage.getRGB(j, i)) != Color(rgb)) {
+                            assertEquals(1, 2)
+                        }
+                    }
+                }
+            }
+            else{
+                for (i in 0 downTo Math.abs(model.height) -1) {
+                    for (j in 0..model.width - 1) {
+                        rgb = getValue(model.pixelArray, (i) * (model.width * 3 + WidthWithPad) + 3 * j, 3)
+                        if (Color(actualImage.getRGB(j, i)) != Color(rgb)) {
+                            assertEquals(1, 2)
+                        }
                     }
                 }
             }
         }
+
     }
 }
 

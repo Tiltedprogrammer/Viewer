@@ -4,5 +4,5 @@
 
 
 fun main(args: Array<String>) {
-    View(args[0])
+        View(args[0])
 }

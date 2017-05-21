@@ -25,22 +25,35 @@ class BMPController(override var view: ViewInterface, override var model: ModelI
             println("File extension is incorrect")
             return
         }
-        when(getValue(data,0x0E,4)){
+        var version = getValue(data,0x0E,4)
+        when(version){
             12 ->{
-                if (data[0x0A].toInt() == 24) {
+                if (getValue(data,0x0A,2) == 24) {
                     model = BMP24Model()
 
-                } else if (data[0x0A].toInt() == 8)
+                } else if (getValue(data,0x0A,2) == 8)
                     model = BMP8Model()
+                else{
+                    println("Unsupported bit per pixel")
+                    return
+                }
 
             }
-            else -> {
-                if (data[0x1C].toInt() == 24) {
+            40,108,124 -> {
+                if (getValue(data,0x1C,2) == 24) {
                     model = BMP24Model()
 
-                } else if (data[0x1C].toInt() == 8)
+                } else if (getValue(data,0x1C,2) == 8 || getValue(data,0x1C,2) == 1)
                     model = BMP8Model()
+                else{
+                    println("Unsupported bits per pixel")
+                    return
+                }
 
+            }
+            else ->{
+                println("Broken version")
+                return
             }
 
 

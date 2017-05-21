@@ -10,11 +10,11 @@ class View(path: String):ViewInterface, JFrame() {
     override var painter: Painter? = null
 
     init {
-        if (path.substring(path.lastIndexOf('.')) == ".bmp") {
+        if (path.substring(path.lastIndexOf('.')) == ".bmp" || path.substring(path.lastIndexOf('.')) == ".dib") {
             controller = BMPController(this)
             controller!!.setData(path)
         } else {
-            println(">Whoops")
+            println("Unsupported extension")
         }
     }
 
@@ -22,6 +22,7 @@ class View(path: String):ViewInterface, JFrame() {
 
 
     override fun update(model: ModelInterface) {
+
 
         when (model) {
             is BMP8Model ->
@@ -31,12 +32,12 @@ class View(path: String):ViewInterface, JFrame() {
                 painter = BMP24Drawer(model)
 
             else ->
-                println(">Whoops")
+                println("Unsupported format")
         }
 
-        val frame = JFrame("Pisos")
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-        frame.setSize(model.width, model.height)
+        val frame = JFrame("Name")
+        frame.defaultCloseOperation=JFrame.EXIT_ON_CLOSE
+        frame.setSize(model.width, Math.abs(model.height))
         frame.add(painter)
         frame.isVisible = true
 
